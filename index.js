@@ -48,16 +48,16 @@ fs.readdirSync('./commands/').forEach((dir) => {
 fs.readdirSync('./events/').forEach((file) => {
   const jsFiles = fs.readdirSync('./events/').filter((f) => f.split('.').pop() === 'js');
   if (jsFiles.length <= 0) return console.log("[EVENTS HANDLER] - Can't find any events!");
-  let checker = true;
 
   jsFiles.forEach((event) => {
     const eventGet = require(`./events/${event}`);
+    let checkerEvent = true;
 
     try {
       Client.events.set(eventGet.name, eventGet);
-      if (checker) {
+      if (checkerEvent) {
+        checkerEvent = false;
         console.log(`[EVENTS HANDLER] - Event ${event} was loaded`);
-        checker = false;
       }
     } catch (err) {
       return console.log('[EVENTS HANDLER]\n' + err);
