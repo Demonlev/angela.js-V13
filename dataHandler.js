@@ -81,6 +81,18 @@ async function createCommand(Client, guildId) {
           require: false
         }
       ]
+    },
+    {
+      name: 'version',
+      description: 'Показывает изменения в боте.',
+      options: [
+        {
+          name: 'версия',
+          type: 'STRING',
+          description: '0.5 | old',
+          require: false
+        }
+      ]
     }
   ];
 

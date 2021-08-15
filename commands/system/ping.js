@@ -5,7 +5,7 @@ const { sysColor, getEmotion } = require('../../angImg');
 module.exports.run = async (inter) => {
   const embed = new MessageEmbed()
     .setColor('#9B59B6')
-    .setFooter('os:/general/manual.info', sysColor('red'))
+    .setFooter('os:/system/ping.info', sysColor('red'))
     .setTimestamp(new Date())
     .setThumbnail(getEmotion('stand'))
     .setAuthor('Состояние серверов', sysColor('red'));
