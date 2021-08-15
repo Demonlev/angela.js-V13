@@ -15,6 +15,72 @@ async function createCommand(Client, guildId) {
           require: true
         }
       ]
+    },
+    {
+      name: 'bonk',
+      description: 'Бонькает сотрудника',
+      options: [
+        {
+          name: 'хорни',
+          type: 'BOOLEAN',
+          description: 'Цель - хорни?',
+          require: false
+        },
+        {
+          name: 'цель',
+          type: 'USER',
+          description: 'Сотрудник, которого бонькнут',
+          require: false
+        },
+        {
+          name: 'бонькер',
+          type: 'USER',
+          description: 'Сотрудник, который будет бонькать',
+          require: false
+        }
+      ]
+    },
+    {
+      name: 'eat',
+      description: 'Сотрудник ждёт еды',
+      options: [
+        {
+          name: 'цель',
+          type: 'USER',
+          description: 'Сотрудник, которого накормят',
+          require: false
+        }
+      ]
+    },
+    {
+      name: 'aaam',
+      description: 'Сотрудник кормят',
+      options: [
+        {
+          name: 'цель',
+          type: 'USER',
+          description: 'Сотрудник, которого кормят',
+          require: false
+        }
+      ]
+    },
+    {
+      name: 'slap',
+      description: 'Шлёпает сотрудника',
+      options: [
+        {
+          name: 'цель',
+          type: 'USER',
+          description: 'Сотрудник, которого отшлёпают',
+          require: false
+        },
+        {
+          name: 'шлёпальщик',
+          type: 'USER',
+          description: 'Сотрудник, который будет шлёпать',
+          require: false
+        }
+      ]
     }
   ];
 
