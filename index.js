@@ -2,7 +2,7 @@ const discord = require('discord.js');
 const fs = require('fs');
 require('dotenv').config();
 
-const isDev = false;
+const isDev = true;
 
 let guild = null;
 let token = null;
@@ -18,13 +18,20 @@ if (!isDev) {
 }
 
 const Client = new discord.Client({
-  intents: [discord.Intents.FLAGS.GUILDS, discord.Intents.FLAGS.GUILD_MEMBERS, discord.Intents.FLAGS.GUILD_MESSAGES],
+  intents: [
+    discord.Intents.FLAGS.GUILDS,
+    discord.Intents.FLAGS.GUILD_MEMBERS,
+    discord.Intents.FLAGS.GUILD_MESSAGES,
+    discord.Intents.FLAGS.GUILD_VOICE_STATES
+  ],
   allowedMentions: { parse: ['users', 'roles'], repliedUser: true }
 });
 
 Client.SlashCommands = new discord.Collection();
 Client.aliases = new discord.Collection();
 Client.events = new discord.Collection();
+const musicQueue = new Map();
+module.exports.musicQueue = musicQueue;
 module.exports.Client = Client;
 module.exports.guild = guild;
 
@@ -63,6 +70,10 @@ fs.readdirSync('./events/').forEach((file) => {
       return console.log('[EVENTS HANDLER]\n' + err);
     }
   });
+});
+
+Client.on('error', (err) => {
+  console.log(err.message)
 });
 
 Client.login(token);
