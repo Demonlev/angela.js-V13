@@ -12,7 +12,7 @@ module.exports.run = async (inter) => {
 
   if (channel_id) {
     discordTogether.createTogetherCode(channel_id, 'youtube').then((x) => {
-      inter.reply(x.code);
+      inter.reply({ content: '**!!! НЕ РАБОТАЕТ НА ТЕЛЕФОНЕ !!!**\n' + x.code });
     });
   } else {
     return await inter.reply({
