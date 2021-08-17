@@ -1,8 +1,9 @@
+const { createAudioPlayer } = require('@discordjs/voice');
 const discord = require('discord.js');
 const fs = require('fs');
 require('dotenv').config();
 
-const isDev = false;
+const isDev = true;
 
 let guild = null;
 let token = null;
@@ -30,8 +31,10 @@ const Client = new discord.Client({
 Client.SlashCommands = new discord.Collection();
 Client.aliases = new discord.Collection();
 Client.events = new discord.Collection();
-const musicQueue = new Map();
-module.exports.musicQueue = musicQueue;
+let player = createAudioPlayer();
+let connection = null;
+module.exports.player = player;
+module.exports.connection = connection;
 module.exports.Client = Client;
 module.exports.guild = guild;
 
@@ -73,7 +76,7 @@ fs.readdirSync('./events/').forEach((file) => {
 });
 
 Client.on('error', (err) => {
-  console.log(err.message)
+  console.log(err.message);
 });
 
 Client.login(token);
