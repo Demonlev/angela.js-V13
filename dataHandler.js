@@ -94,32 +94,32 @@ async function createCommand(Client, guildId) {
         }
       ]
     },
-    {
-      name: 'music',
-      description: 'Настройки музыки.',
-      options: [
-        {
-          name: 'play',
-          type: 'SUB_COMMAND',
-          description: 'Воспроиводит музыку.',
-          require: true,
-          options: [
-            {
-              name: 'поиск',
-              type: 'STRING',
-              description: 'Укажите ссылку на ютубе или название видео.',
-              require: false
-            }
-          ]
-        },
-        {
-          name: 'stop',
-          type: 'SUB_COMMAND',
-          description: 'Останавливает музыку и выходит из канала',
-          require: true
-        }
-      ]
-    },
+    // {
+    //   name: 'music',
+    //   description: 'Настройки музыки.',
+    //   options: [
+    //     {
+    //       name: 'play',
+    //       type: 'SUB_COMMAND',
+    //       description: 'Воспроиводит музыку.',
+    //       require: true,
+    //       options: [
+    //         {
+    //           name: 'поиск',
+    //           type: 'STRING',
+    //           description: 'Укажите ссылку на ютубе или название видео.',
+    //           require: false
+    //         }
+    //       ]
+    //     },
+    //     {
+    //       name: 'stop',
+    //       type: 'SUB_COMMAND',
+    //       description: 'Останавливает музыку и выходит из канала',
+    //       require: true
+    //     }
+    //   ]
+    // },
     {
       name: 'watch',
       description: 'Совместный просмотр ютуба.'

@@ -1,24 +1,22 @@
-const { MessageEmbed } = require('discord.js');
-const {
-  joinVoiceChannel,
-  createAudioPlayer,
-  createAudioResource,
-  NoSubscriberBehavior,
-  generateDependencyReport
-} = require('@discordjs/voice');
-const { OpusEncoder } = require('@discordjs/opus');
+const { MessageEmbed, CommandInteraction } = require('discord.js');
+const { joinVoiceChannel, createAudioPlayer, createAudioResource, NoSubscriberBehavior } = require('@discordjs/voice');
 const Client = require('../../index').Client;
 const ytdl = require('ytdl-core');
 const { YTSearcher } = require('ytsearcher');
+const fs = require('fs');
 
 const musicQueue = require('../../index').musicQueue;
 const { guild } = require('../../index');
+const { join } = require('path');
 
 const searcher = new YTSearcher({
   key: process.env.YT_API_KEY,
   revealKey: true
 });
 
+/**
+ * @param {CommandInteraction} inter
+ */
 module.exports.run = async (inter) => {
   const channel_id = inter.member.voice.channelId;
   if (!channel_id) {
@@ -34,14 +32,13 @@ module.exports.run = async (inter) => {
       if (value.substr(0, 8) !== 'https://') {
         const result = await searcher.search(value, { type: 'video' });
 
-        const songInfo = await ytdl.getInfo(result.currentPage[0].url);
+        if (!result.currentPage[0].url) {
+          inter.reply({ content: 'Ничего не найдено.', ephemeral: true });
+        }
 
-        const song = {
-          title: songInfo.videoDetails.title,
-          url: songInfo.videoDetails.video_url
-        };
+        ytdl(result.currentPage[0].url, { filter: 'audioonly' }).pipe(fs.createWriteStream('temp/video.mp4'));
 
-        musicQueue.get('queue').push(song);
+        musicQueue.get('queue').push(result.currentPage[0].url);
 
         connection = await joinVoiceChannel({
           channelId: channel_id,
@@ -55,10 +52,11 @@ module.exports.run = async (inter) => {
           }
         });
 
-        const audio = createAudioResource(ytdl(song.url, { filter: 'audioonly' }), { inputType: 'webm/opus' });
+        const audio = createAudioResource(ytdl(result.currentPage[0].url, { filter: 'audioonly', quality: 'highest' }));
+
+        console.log(audio);
 
         player.play(audio);
-
 
         connection.subscribe(player);
 

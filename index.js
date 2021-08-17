@@ -2,7 +2,7 @@ const discord = require('discord.js');
 const fs = require('fs');
 require('dotenv').config();
 
-const isDev = true;
+const isDev = false;
 
 let guild = null;
 let token = null;
