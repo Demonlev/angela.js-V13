@@ -94,47 +94,59 @@ async function createCommand(Client, guildId) {
         }
       ]
     },
-    {
-      name: 'music',
-      description: 'Настройки музыки.',
-      options: [
-        {
-          name: 'play',
-          type: 'SUB_COMMAND',
-          description: 'Воспроиводит музыку.',
-          require: true,
-          options: [
-            {
-              name: 'поиск',
-              type: 'STRING',
-              description: 'Укажите ссылку на ютубе или название видео.',
-              require: true
-            }
-          ]
-        },
-        {
-          name: 'stop',
-          type: 'SUB_COMMAND',
-          description: 'Останавливает музыку и выходит из канала.',
-          require: true
-        },
-        // {
-        //   name: 'queue',
-        //   type: 'SUB_COMMAND',
-        //   description: 'Показывает список музыки в очереди.',
-        //   require: true
-        // }
-        {
-          name: 'skip',
-          type: 'SUB_COMMAND',
-          description: 'Пропускает текущий трек.',
-          require: true
-        }
-      ]
-    },
+    // {
+    //   name: 'music',
+    //   description: 'Настройки музыки.',
+    //   options: [
+    //     {
+    //       name: 'play',
+    //       type: 'SUB_COMMAND',
+    //       description: 'Воспроиводит музыку.',
+    //       require: true,
+    //       options: [
+    //         {
+    //           name: 'поиск',
+    //           type: 'STRING',
+    //           description: 'Укажите ссылку на ютубе или название видео.',
+    //           require: true
+    //         }
+    //       ]
+    //     },
+    //     {
+    //       name: 'stop',
+    //       type: 'SUB_COMMAND',
+    //       description: 'Останавливает музыку и выходит из канала.',
+    //       require: true
+    //     },
+    // {
+    //   name: 'queue',
+    //   type: 'SUB_COMMAND',
+    //   description: 'Показывает список музыки в очереди.',
+    //   require: true
+    // }
+    //     {
+    //       name: 'skip',
+    //       type: 'SUB_COMMAND',
+    //       description: 'Пропускает текущий трек.',
+    //       require: true
+    //     }
+    //   ]
+    // },
     {
       name: 'watch',
       description: 'Совместный просмотр ютуба.'
+    },
+    {
+      name: 'gs',
+      description: 'Рандомные картинки.',
+      options: [
+        {
+          name: 'тег',
+          type: 'STRING',
+          description: 'Введите тег.',
+          require: true
+        }
+      ]
     }
   ];
 

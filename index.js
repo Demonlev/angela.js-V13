@@ -2,8 +2,9 @@ const { createAudioPlayer } = require('@discordjs/voice');
 const discord = require('discord.js');
 const fs = require('fs');
 require('dotenv').config();
+const firebase = require('firebase/app');
 
-const isDev = true;
+const isDev = false;
 
 let guild = null;
 let token = null;
@@ -28,10 +29,21 @@ const Client = new discord.Client({
   allowedMentions: { parse: ['users', 'roles'], repliedUser: true }
 });
 
+firebase.initializeApp({
+  apiKey: process.env.FB_API_KEY,
+  authDomain: process.env.FB_AUTH_DOMAIN,
+  databaseURL: process.env.FB_DATABASE_URL,
+  projectId: process.env.FB_PROJECT_ID,
+  storageBucket: process.env.FB_STORAGE_BUCKET,
+  messagingSenderId: process.env.FB_MESSAGING_SENDER_ID,
+  appId: process.env.FB_APP_ID
+});
+
 Client.SlashCommands = new discord.Collection();
 Client.aliases = new discord.Collection();
 Client.events = new discord.Collection();
-let player = createAudioPlayer();
+let player = createAudioPlayer({ behaviors: { noSubscriber: 'pause', maxMissedFrames: 200 } });
+player.on('error', console.error);
 let connection = null;
 module.exports.player = player;
 module.exports.connection = connection;
