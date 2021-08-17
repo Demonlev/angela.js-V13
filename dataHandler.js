@@ -119,6 +119,10 @@ async function createCommand(Client, guildId) {
           require: true
         }
       ]
+    },
+    {
+      name: 'watch',
+      description: 'Совместный просмотр ютуба.'
     }
   ];
 
