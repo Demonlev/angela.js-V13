@@ -14,6 +14,7 @@ const searcher = new YTSearcher({
  * @param {CommandInteraction} inter
  */
 module.exports.run = async (inter) => {
+  console.log('run');
   const channel_id = inter.member.voice.channelId;
   if (!channel_id) {
     return await inter.reply({
@@ -22,6 +23,7 @@ module.exports.run = async (inter) => {
     });
   } else {
     if (inter.options.getSubcommand() === 'play') {
+      console.log('play');
       const value = inter.options.getString('поиск');
       if (!value) {
         return await inter.reply({ content: 'Укажите ссылку или название видео.' });
@@ -29,6 +31,7 @@ module.exports.run = async (inter) => {
 
       // ONE VIDEO BY NAME
       if (value.substr(0, 8) !== 'https://') {
+        console.log('name');
         const result = await searcher.search(value, { type: 'video' });
 
         if (!result.currentPage[0].url) {
@@ -79,6 +82,7 @@ module.exports.run = async (inter) => {
  * @param {CommandInteraction} inter
  */
 async function play(inter, url) {
+  console.log('connecton');
   if (!connection) {
     const channel_id = inter.member.voice.channelId;
     connection = await joinVoiceChannel({
@@ -89,12 +93,20 @@ async function play(inter, url) {
   }
 
   const stream = await ytdl(url);
+  console.log('stream');
+  console.log(stream);
 
   const source = createAudioResource(stream, { inputType: StreamType.Opus, inlineVolume: true });
+  console.log('source');
+  console.log(source);
 
   player.play(source);
+  console.log('player');
+  console.log(player);
 
   connection.subscribe(player);
+  console.log('connection.subscribe');
+  console.log(connection);
 }
 
 module.exports.help = {
