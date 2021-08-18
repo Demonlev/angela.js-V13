@@ -4,7 +4,7 @@ const fs = require('fs');
 require('dotenv').config();
 const firebase = require('firebase/app');
 
-const isDev = false;
+const isDev = true;
 
 let guild = null;
 let token = null;
@@ -42,11 +42,10 @@ firebase.initializeApp({
 Client.SlashCommands = new discord.Collection();
 Client.aliases = new discord.Collection();
 Client.events = new discord.Collection();
-let player = createAudioPlayer({ behaviors: { noSubscriber: 'pause', maxMissedFrames: 200 } });
-player.on('error', console.error);
-let connection = null;
-module.exports.player = player;
-module.exports.connection = connection;
+const subscriptions = new Map();
+let subscription = subscriptions.get(guild);
+module.exports.subscriptions = subscriptions;
+module.exports.subscription = subscription;
 module.exports.Client = Client;
 module.exports.guild = guild;
 

@@ -60,7 +60,7 @@ module.exports.run = async (inter) => {
     });
   }
 
-  return await inter.reply({ content: ' ', ephemeral: false, embeds: [embed] });
+  return await inter.reply({ content: '\u200b', ephemeral: false, embeds: [embed] });
 };
 
 module.exports.help = {

@@ -1,9 +1,11 @@
-const { CommandInteraction, MessageEmbed } = require('discord.js');
-const { joinVoiceChannel, createAudioPlayer, createAudioResource, StreamType } = require('@discordjs/voice');
-const ytdl = require('ytdl-core-discord');
+const { CommandInteraction, GuildMember, MessageEmbed } = require('discord.js');
+const { AudioPlayerStatus, entersState, joinVoiceChannel, VoiceConnectionStatus } = require('@discordjs/voice');
 const { YTSearcher } = require('ytsearcher');
+const { Track } = require('../../helpers/track');
+const { MusicSubscription } = require('../../helpers/subscription');
 
-let { guild, connection, player } = require('../../index');
+const { sysColor } = require('../../angImg');
+let { guild, connection, subscription, subscriptions } = require('../../index');
 
 const searcher = new YTSearcher({
   key: process.env.YT_API_KEY,
@@ -22,29 +24,79 @@ module.exports.run = async (inter) => {
     });
   } else {
     if (inter.options.getSubcommand() === 'play') {
-      const value = inter.options.getString('поиск');
-      if (!value) {
-        return await inter.reply({ content: 'Укажите ссылку или название видео.' });
+      inter.deferReply();
+      let url = inter.options.getString('поиск');
+
+      if (!url) {
+        inter.followUp({ content: 'Введите ссылку или название видео!', ephemeral: true });
+        return;
       }
 
-      // ONE VIDEO BY NAME
-      if (value.substr(0, 8) !== 'https://') {
-        const result = await searcher.search(value, { type: 'video' });
-
-        if (!result.currentPage[0].url) {
-          inter.reply({ content: 'Ничего не найдено.', ephemeral: true });
+      if (url.substr(0, 17) !== 'https://youtu.be/' || url.substr(0, 29) !== 'https://www.youtube.com/watch') {
+        const result = await searcher.search(url, { type: 'video' });
+        if (!result.currentPage[0]) {
+          inter.followUp({ content: 'Ничего не найдено.', ephemeral: true });
+          return;
         }
-
-        play(inter, result.currentPage[0].url);
-
-        return await inter.reply({ content: result.currentPage[0].url });
+        if (!result.currentPage[0].url) {
+          inter.followUp({ content: 'Ничего не найдено.', ephemeral: true });
+          return;
+        }
+        url = result.currentPage[0].url;
       }
 
-      // ONE VIDEO BY URL
-      if (value.substr(0, 17) === 'https://youtu.be/' || value.substr(0, 29) === 'https://www.youtube.com/watch') {
-        play(inter, value);
+      if (!subscription) {
+        if (inter.member instanceof GuildMember && inter.member.voice.channel) {
+          subscription = new MusicSubscription(
+            joinVoiceChannel({
+              channelId: channel_id,
+              guildId: guild,
+              adapterCreator: inter.guild.voiceAdapterCreator
+            })
+          );
+          subscription.voiceConnection.on('error', console.warn);
+          subscriptions.set(inter.guildId, subscription);
+        }
+      }
 
-        return await inter.reply({ content: info.videoDetails.title + 'играет.' });
+      if (!subscription) {
+        await interaction.followUp('Зайдите в голосовой канал, чтобы использовать голосовые команды!');
+        return;
+      }
+
+      try {
+        await entersState(subscription.voiceConnection, VoiceConnectionStatus.Ready, 20e3);
+      } catch (error) {
+        console.warn(error);
+        await inter.followUp('Не удалось включить трек. Попробуйте позже!');
+        return;
+      }
+
+      try {
+        // Attempt to create a Track from the user's video URL
+        const track = await Track.from(url, {
+          onStart() {},
+          onFinish() {},
+          onError(error) {
+            console.warn(error);
+            inter.followUp({ content: `Error: ${error.message}`, ephemeral: false }).catch(console.warn);
+          }
+        });
+        // Enqueue the track and reply a success message to the user
+        subscription.enqueue(track);
+        const embed = new MessageEmbed()
+          .setColor('#9B59B6')
+          .setFooter('os:/music/track.info', sysColor('red'))
+          .setTimestamp(new Date())
+          .setThumbnail(track.thumbnail)
+          .setAuthor('Добавил в очередь', inter.user.avatarURL({ size: 64 }));
+
+        embed.addField(track.url, track.title);
+        embed.addField('Длительность', `${new Date(track.duration * 1000).toISOString().substr(11, 8)}`);
+        await inter.followUp({ content: '\u200b', embeds: [embed] });
+      } catch (error) {
+        console.warn(error);
+        await inter.reply('Не удалось включить трек. Попробуйте позже!');
       }
     }
 
@@ -54,48 +106,88 @@ module.exports.run = async (inter) => {
     }
 
     if (inter.options.getSubcommand() === 'skip') {
-      player.stop();
-      return await inter.reply({ content: 'Пропускаю текущий трек.', ephemeral: false });
+      if (subscription) {
+        // Calling .stop() on an AudioPlayer causes it to transition into the Idle state. Because of a state transition
+        // listener defined in music/subscription.ts, transitions into the Idle state mean the next track from the queue
+        // will be loaded and played.
+        subscription.audioPlayer.stop();
+        await inter.reply({ content: 'Трек пропущен!', ephemeral: false });
+      } else {
+        await inter.reply({ content: 'Ошибка: music - 100!', ephemeral: true });
+      }
     }
 
-    // if (inter.options.getSubcommand() === 'queue') {
-    //   const embed = new MessageEmbed()
-    //     .setColor('#9B59B6')
-    //     .setFooter('os:/music/queue.info', sysColor('red'))
-    //     .setTimestamp(new Date())
-    //     .setAuthor('Очередь', sysColor('red'));
+    if (inter.options.getSubcommand() === 'queue') {
+      if (subscription) {
+        const current =
+          subscription.audioPlayer.state.status === AudioPlayerStatus.Idle
+            ? undefined
+            : subscription.audioPlayer.state.resource.metadata;
 
-    //   musicQueue.get('queue').forEach((url) => {
-    //     embed.addField(url, '\u200b');
-    //   });
-    //   return await inter.reply({ content: '\u200b', embeds: [embed] });
-    // }
+        const queue = subscription.queue.slice(0, 2).map((track, index) => {
+          return {
+            title: track.title,
+            thumbnail: track.thumbnail,
+            duration: track.duration,
+            url: track.url,
+            queue: index
+          };
+        });
+
+        const embed = new MessageEmbed()
+          .setColor('#9B59B6')
+          .setFooter('os:/music/track.info', sysColor('red'))
+          .setTimestamp(new Date())
+          .setThumbnail(current.thumbnail)
+          .setAuthor('Сейчас играет');
+        embed.addField(current.url, current.title);
+        embed.addField('Длительность', `${new Date(current.duration * 1000).toISOString().substr(11, 8)}`);
+
+        let secondsLeft = current.duration * 1000;
+
+        queue.forEach((track) => {
+          secondsLeft = secondsLeft + track.duration * 1000;
+          embed.addField('\u200b', '\u200b');
+          embed.addField(`========== В очереди #${track.queue + 2} ==========`, `${track.title}\n${track.url}`);
+          embed.addField('Длительность', `${new Date(track.duration * 1000).toISOString().substr(11, 8)}`);
+          embed.addField('До трека примерно осталось', `${new Date(secondsLeft).toISOString().substr(11, 8)}`);
+        });
+
+        await inter.reply({ content: '\u200b', embeds: [embed], ephemeral: false });
+      } else {
+        await inter.reply({ content: 'Очереди нет.', ephemeral: true });
+      }
+    }
+
+    if (inter.options.getSubcommand() === 'pause') {
+      if (subscription) {
+        subscription.audioPlayer.pause();
+        await inter.reply({ content: `Ставлю на паузу!`, ephemeral: false });
+      } else {
+        await inter.reply({ content: 'Ошибка: music - 127!', ephemeral: true });
+      }
+    }
+
+    if (inter.options.getSubcommand() === 'resume') {
+      if (subscription) {
+        subscription.audioPlayer.unpause();
+        await inter.reply({ content: `Продолжаю играть трек!`, ephemeral: false });
+      } else {
+        await inter.reply({ content: 'Ошибка: music - 136!', ephemeral: true });
+      }
+    }
+
+    if (inter.options.getSubcommand() === 'leave') {
+      if (subscription) {
+        subscription.voiceConnection.destroy();
+        subscriptions.delete(guild);
+        await inter.reply({ content: `Покидаю канал!`, ephemeral: false });
+      } else {
+        await inter.reply({ content: 'Ошибка: music - 146!', ephemeral: true });
+      }
+    }
   }
-
-  return await inter.reply({ content: 'music', ephemeral: false });
 };
-
-/**
- * @param {CommandInteraction} inter
- */
-async function play(inter, url) {
-  if (!connection) {
-    const channel_id = inter.member.voice.channelId;
-    connection = await joinVoiceChannel({
-      channelId: channel_id,
-      guildId: guild,
-      adapterCreator: inter.guild.voiceAdapterCreator
-    });
-  }
-
-  const stream = await ytdl(url);
-
-  const source = createAudioResource(stream, { inputType: StreamType.Opus, inlineVolume: true });
-
-  player.play(source);
-
-  connection.subscribe(player);
-}
 
 module.exports.help = {
   name: 'music',

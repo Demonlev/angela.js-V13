@@ -18,7 +18,7 @@ module.exports.run = async (inter) => {
     message = 'Discord servers were destroyed.';
   }
   embed.addField(`[Discord API] - ${api}мс`, message);
-  return await inter.reply({ content: ' ', ephemeral: false, embeds: [embed] });
+  return await inter.reply({ content: '\u200b', ephemeral: false, embeds: [embed] });
 };
 
 module.exports.help = {
