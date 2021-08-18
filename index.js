@@ -91,3 +91,4 @@ Client.on('error', (err) => {
 });
 
 Client.login(token);
+process.on("unhandledRejection", error => console.error("Promise rejection:", error));
