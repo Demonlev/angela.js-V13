@@ -23,6 +23,9 @@ module.exports.run = async (inter) => {
       if (inter.guild.me.voice.channelId && inter.member.voice.channelId !== inter.guild.me.voice.channelId)
         return await inter.reply({ content: 'Вы должны находиться в том же канале, что и я!', ephemeral: true });
       const query = inter.options.getString('поиск');
+      if (!query) {
+        return await inter.reply({ content: 'Введите ссылку или название трека!', ephemeral: true });
+      }
       const queue = player.createQueue(inter.guild, {
         metadata: {
           channel: inter.channel
@@ -54,6 +57,13 @@ module.exports.run = async (inter) => {
 
       embed.addField(track.url, track.title);
       embed.addField('Длительность', `${new Date(track.durationMS * 1000).toISOString().substr(11, 8)}`);
+      if (player.getQueue(inter.guildId).tracks.length !== 0) {
+        let secondsLeft = player.getQueue(inter.guildId).current.durationMS;
+        player.getQueue(inter.guildId).tracks.map((track) => {
+          secondsLeft += track.durationMS;
+        });
+        embed.addField('Будет играть через: ', `${new Date(secondsLeft * 1000).toISOString().substr(11, 8)}`);
+      }
       return await inter.followUp({ content: '\u200b', embeds: [embed] });
     }
 
@@ -67,14 +77,17 @@ module.exports.run = async (inter) => {
         .setTimestamp(new Date())
         .setThumbnail(player.getQueue(inter.guildId).current.thumbnail)
         .setAuthor('Сейчас играет');
+
       embed.addField(player.getQueue(inter.guildId).current.url, player.getQueue(inter.guildId).current.title);
-      embed.addField('Длительность', `${new Date(player.getQueue(inter.guildId).current.durationMS * 1000).toISOString().substr(11, 8)}`);
+      embed.addField(
+        'Длительность',
+        `${new Date(player.getQueue(inter.guildId).current.durationMS * 1000).toISOString().substr(11, 8)}`
+      );
 
       let secondsLeft = player.getQueue(inter.guildId).current.durationMS * 1000;
 
       tracks.forEach((track, id) => {
         secondsLeft = secondsLeft + track.durationMS * 1000;
-        embed.addField('\u200b', '\u200b');
         embed.addField(`========== В очереди #${id + 2} ==========`, `${track.title}\n${track.url}`);
         embed.addField('Длительность', `${new Date(track.durationMS * 1000).toISOString().substr(11, 8)}`);
         embed.addField('Будет играть через: ', `${new Date(secondsLeft).toISOString().substr(11, 8)}`);
@@ -94,24 +107,24 @@ module.exports.run = async (inter) => {
 
       if (state === false) {
         player.getQueue(inter.guildId).setPaused(false);
-        return await inter.followUp({content: 'Плеер на паузе!', ephemeral: false});
+        return await inter.followUp({ content: 'Плеер снят с паузы!', ephemeral: false });
       } else if (state === true) {
         player.getQueue(inter.guildId).setPaused(true);
-        return await inter.followUp({content: 'Плеер снят с паузы!', ephemeral: false});
+        return await inter.followUp({ content: 'Плеер поставлен на паузу!', ephemeral: false });
       } else {
-        return await inter.followUp({content: 'Ошибка - music.js 101!', ephemeral: true});
+        return await inter.followUp({ content: 'Ошибка - music.js 101!', ephemeral: true });
       }
     }
 
     if (inter.options.getSubcommand() === 'skip') {
       const current = player.getQueue(inter.guildId).current;
       player.getQueue(inter.guildId).skip(true);
-      return await inter.reply({content: `**${current.title}** пропущен!`});
+      return await inter.reply({ content: `**${current.title}** пропущен!` });
     }
 
     if (inter.options.getSubcommand() === 'leave') {
       player.getQueue(inter.guildId).destroy(true);
-      return await inter.reply({content: `Выхожу.`, ephemeral: false});
+      return await inter.reply({ content: `Выхожу.`, ephemeral: false });
     }
   }
 };
