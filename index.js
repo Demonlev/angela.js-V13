@@ -1,10 +1,10 @@
-const { createAudioPlayer } = require('@discordjs/voice');
 const discord = require('discord.js');
 const fs = require('fs');
 require('dotenv').config();
 const firebase = require('firebase/app');
+const { Player } = require("discord-player");
 
-const isDev = true;
+const isDev = true
 
 let guild = null;
 let token = null;
@@ -42,10 +42,9 @@ firebase.initializeApp({
 Client.SlashCommands = new discord.Collection();
 Client.aliases = new discord.Collection();
 Client.events = new discord.Collection();
-const subscriptions = new Map();
-let subscription = subscriptions.get(guild);
-module.exports.subscriptions = subscriptions;
-module.exports.subscription = subscription;
+const player = new Player(Client);
+
+module.exports.player = player;
 module.exports.Client = Client;
 module.exports.guild = guild;
 

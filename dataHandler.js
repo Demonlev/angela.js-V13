@@ -116,7 +116,15 @@ async function createCommand(Client, guildId) {
           name: 'pause',
           type: 'SUB_COMMAND',
           description: 'Останавливает музыку.',
-          require: true
+          require: true,
+          options: [
+            {
+              name: 'пауза',
+              type: 'BOOLEAN',
+              description: 'true - останавливает / false - включает',
+              require: true
+            }
+          ]
         },
         {
           name: 'queue',
@@ -128,12 +136,6 @@ async function createCommand(Client, guildId) {
           name: 'skip',
           type: 'SUB_COMMAND',
           description: 'Пропускает текущий трек.',
-          require: true
-        },
-        {
-          name: 'resume',
-          type: 'SUB_COMMAND',
-          description: 'Воспроиводит текущий трек.',
           require: true
         },
         {
