@@ -12,7 +12,7 @@ async function createCommand(Client, guildId) {
           name: 'текст',
           type: 'STRING',
           description: 'Текст, который повторит бот',
-          require: true
+          required: true
         }
       ]
     },
@@ -24,19 +24,19 @@ async function createCommand(Client, guildId) {
           name: 'хорни',
           type: 'BOOLEAN',
           description: 'Цель - хорни?',
-          require: false
+          required: false
         },
         {
           name: 'цель',
           type: 'USER',
           description: 'Сотрудник, которого бонькнут',
-          require: false
+          required: false
         },
         {
           name: 'бонькер',
           type: 'USER',
           description: 'Сотрудник, который будет бонькать',
-          require: false
+          required: false
         }
       ]
     },
@@ -48,7 +48,7 @@ async function createCommand(Client, guildId) {
           name: 'цель',
           type: 'USER',
           description: 'Сотрудник, которого накормят',
-          require: false
+          required: false
         }
       ]
     },
@@ -60,7 +60,7 @@ async function createCommand(Client, guildId) {
           name: 'цель',
           type: 'USER',
           description: 'Сотрудник, которого кормят',
-          require: false
+          required: false
         }
       ]
     },
@@ -72,13 +72,13 @@ async function createCommand(Client, guildId) {
           name: 'цель',
           type: 'USER',
           description: 'Сотрудник, которого отшлёпают',
-          require: false
+          required: false
         },
         {
           name: 'шлёпальщик',
           type: 'USER',
           description: 'Сотрудник, который будет шлёпать',
-          require: false
+          required: false
         }
       ]
     },
@@ -89,8 +89,8 @@ async function createCommand(Client, guildId) {
         {
           name: 'версия',
           type: 'STRING',
-          description: '0.5 | old',
-          require: false
+          description: '0.5.1 | 0.5.0 | old | all',
+          required: false
         }
       ]
     },
@@ -108,7 +108,7 @@ async function createCommand(Client, guildId) {
               name: 'поиск',
               type: 'STRING',
               description: 'Укажите ссылку на ютубе или название видео.',
-              require: true
+              required: true
             }
           ]
         },
@@ -122,7 +122,7 @@ async function createCommand(Client, guildId) {
               name: 'пауза',
               type: 'BOOLEAN',
               description: 'true - останавливает / false - включает',
-              require: true
+              required: true
             }
           ]
         },
@@ -158,7 +158,19 @@ async function createCommand(Client, guildId) {
           name: 'тег',
           type: 'STRING',
           description: 'Введите тег.',
-          require: true
+          required: true
+        }
+      ]
+    },
+    {
+      name: 'eval',
+      description: 'Превращает строку в js код и возвращает результат или ошибку',
+      options: [
+        {
+          name: 'код',
+          type: 'STRING',
+          description: 'Введите код.',
+          required: true
         }
       ]
     }

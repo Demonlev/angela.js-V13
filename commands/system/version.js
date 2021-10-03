@@ -14,16 +14,14 @@ module.exports.run = async (inter) => {
     .setTimestamp(new Date())
     .setThumbnail(getEmotion('stand'));
 
-  if (version === '0.5') {
-    jsonText = json['0.5 beta'];
+  if (version === 'all') {
+    embed.setAuthor('Просмотр всех версий', sysColor('red'));
+    const versions = Object.keys(json);
 
-    embed.setAuthor('Просмотр версии 0.5 beta', sysColor('red'));
-
-    jsonText.forEach((note) => {
-      embed.addField('\u200b', note);
+    versions.forEach((version) => {
+      embed.addField(version, '\u200b', true);
     });
   }
-
   if (version === 'old') {
     embed.setAuthor('Просмотр старых версий < 0.5', sysColor('red'));
     const versions = Object.keys(json);
@@ -41,23 +39,23 @@ module.exports.run = async (inter) => {
 
     versions.forEach((version) => {
       if (Number(version.substr(0, 3)) >= 0.5) {
-        if (version === '0.5 beta') {
-          embed.addField('0.5', 'beta', true);
-        } else {
-          embed.addField(version, '\u200b', true);
-        }
+        embed.addField(version, '\u200b', true);
       }
     });
   }
 
-  if (version != undefined && version !== 'old' && version !== '0.5') {
+  if (version != undefined && version !== 'old' && version !== 'all') {
     jsonText = json[version];
 
     embed.setAuthor(`Просмотр версии ${version}`, sysColor('red'));
 
-    jsonText.forEach((note) => {
-      embed.addField('\u200b', note);
-    });
+    if (jsonText) {
+      jsonText.forEach((note) => {
+        embed.addField('\u200b', note);
+      });
+    } else {
+      return await inter.reply({ content: 'Неверная версия!', ephemeral: true });
+    }
   }
 
   return await inter.reply({ content: '\u200b', ephemeral: false, embeds: [embed] });
