@@ -4,7 +4,7 @@ require('dotenv').config();
 const firebase = require('firebase/app');
 const { Player } = require("discord-player");
 
-const isDev = false;
+const isDev = true;
 
 let guild = null;
 let token = null;
