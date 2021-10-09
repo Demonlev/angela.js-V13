@@ -155,6 +155,12 @@ async function createCommand(Client, guildId) {
           type: 'SUB_COMMAND',
           description: 'Покидает канал.',
           require: true
+        },
+        {
+          name: 'skip',
+          type: 'SUB_COMMAND',
+          description: 'Пропускает текущий трек.',
+          require: true
         }
       ]
     },
