@@ -108,18 +108,18 @@ async function createCommand(Client, guildId) {
     },
     {
       name: 'music',
-      description: 'Плеер.',
+      description: 'Музыкальный плеер.',
       options: [
         {
           name: 'play',
           type: 'SUB_COMMAND',
-          description: 'Воспроиводит музыку на Youtube или Spotify.',
+          description: 'Воспроизводит музыку на Youtube или Spotify.',
           require: true,
           options: [
             {
               name: 'поиск',
               type: 'STRING',
-              description: 'Youtube ссылка на - ролик, плейлист или Spotify ссылка на трек.',
+              description: 'Youtube ссылка на ролик или плейлист | Spotify ссылка на трек.',
               required: true
             }
           ]
@@ -127,13 +127,13 @@ async function createCommand(Client, guildId) {
         {
           name: 'pause',
           type: 'SUB_COMMAND',
-          description: 'Останавливает музыку.',
+          description: 'Останавливает или возобновляет музыку.',
           require: true,
           options: [
             {
               name: 'пауза',
               type: 'BOOLEAN',
-              description: 'true - останавливает / false - включает',
+              description: 'true - останавливает / false - возобновляет',
               required: true
             }
           ]
@@ -141,13 +141,13 @@ async function createCommand(Client, guildId) {
         {
           name: 'queue',
           type: 'SUB_COMMAND',
-          description: 'Показывает список музыки в очереди.',
+          description: 'Показывает список музыки в очереди. 5 треков подробно и общее количество в очереди.',
           require: true
         },
         {
-          name: 'skip',
+          name: 'clear',
           type: 'SUB_COMMAND',
-          description: 'Пропускает текущий трек.',
+          description: 'Очищает очередь.',
           require: true
         },
         {
