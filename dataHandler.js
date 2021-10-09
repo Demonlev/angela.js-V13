@@ -108,18 +108,18 @@ async function createCommand(Client, guildId) {
     },
     {
       name: 'music',
-      description: 'Настройки музыки.',
+      description: 'Плеер.',
       options: [
         {
           name: 'play',
           type: 'SUB_COMMAND',
-          description: 'Воспроиводит музыку.',
+          description: 'Воспроиводит музыку на Youtube или Spotify.',
           require: true,
           options: [
             {
               name: 'поиск',
               type: 'STRING',
-              description: 'Укажите ссылку на ютубе или название видео.',
+              description: 'Youtube ссылка на - ролик, плейлист или Spotify ссылка на трек.',
               required: true
             }
           ]
