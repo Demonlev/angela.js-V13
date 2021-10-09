@@ -54,12 +54,24 @@ async function createCommand(Client, guildId) {
     },
     {
       name: 'aaam',
-      description: 'Сотрудник кормят',
+      description: 'Сотрудника кормят',
       options: [
         {
           name: 'цель',
           type: 'USER',
           description: 'Сотрудник, которого кормят',
+          required: false
+        }
+      ]
+    },
+    {
+      name: 'up',
+      description: 'Сказать сотруднику проснуться',
+      options: [
+        {
+          name: 'цель',
+          type: 'USER',
+          description: 'Сотрудник, которого нужно разбудить',
           required: false
         }
       ]
@@ -157,7 +169,7 @@ async function createCommand(Client, guildId) {
         {
           name: 'тег',
           type: 'STRING',
-          description: 'Введите тег.',
+          description: 'Введите тег. Популярные теги: мем, кот, кошка, рыба, птица, акула, пиксель, змея.',
           required: true
         }
       ]

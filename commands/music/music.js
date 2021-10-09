@@ -56,13 +56,13 @@ module.exports.run = async (inter) => {
         .setAuthor('Добавил в очередь', inter.user.avatarURL({ size: 64 }));
 
       embed.addField(track.url, track.title);
-      embed.addField('Длительность', `${new Date(track.durationMS * 1000).toISOString().substr(11, 8)}`);
+      embed.addField('Длительность', `${new Date(track.durationMS).toISOString().substr(11, 8)}`);
       if (player.getQueue(inter.guildId).tracks.length !== 0) {
         let secondsLeft = player.getQueue(inter.guildId).current.durationMS;
         player.getQueue(inter.guildId).tracks.map((track) => {
           secondsLeft += track.durationMS;
         });
-        embed.addField('Будет играть через: ', `${new Date(secondsLeft * 1000).toISOString().substr(11, 8)}`);
+        embed.addField('Будет играть через: ', `${new Date(secondsLeft).toISOString().substr(11, 8)}`);
       }
       return await inter.followUp({ content: '\u200b', embeds: [embed] });
     }
@@ -81,15 +81,15 @@ module.exports.run = async (inter) => {
       embed.addField(player.getQueue(inter.guildId).current.url, player.getQueue(inter.guildId).current.title);
       embed.addField(
         'Длительность',
-        `${new Date(player.getQueue(inter.guildId).current.durationMS * 1000).toISOString().substr(11, 8)}`
+        `${new Date(player.getQueue(inter.guildId).current.durationMS).toISOString().substr(11, 8)}`
       );
 
-      let secondsLeft = player.getQueue(inter.guildId).current.durationMS * 1000;
+      let secondsLeft = player.getQueue(inter.guildId).current.durationMS;
 
       tracks.forEach((track, id) => {
-        secondsLeft = secondsLeft + track.durationMS * 1000;
+        secondsLeft = secondsLeft + track.durationMS;
         embed.addField(`========== В очереди #${id + 2} ==========`, `${track.title}\n${track.url}`);
-        embed.addField('Длительность', `${new Date(track.durationMS * 1000).toISOString().substr(11, 8)}`);
+        embed.addField('Длительность', `${track.duration}`);
         embed.addField('Будет играть через: ', `${new Date(secondsLeft).toISOString().substr(11, 8)}`);
       });
 

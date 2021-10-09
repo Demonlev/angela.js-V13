@@ -14,10 +14,10 @@ Client.on('guildMemberAdd', async (event) => {
 
   const data = welcomes[rand];
 
-  data[1].replace(/{}/, event.user.username);
+  const desc = data[1].replace(/{}/, event.user.username);
 
   embed.setTitle(`Новый сотрудник - ${event.user.username}`);
-  embed.setDescription(data[1]);
+  embed.setDescription(desc);
   embed.setThumbnail(data[0]);
 
   await event.guild.systemChannel.send({ content: '\u200b', embeds: [embed] });

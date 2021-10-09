@@ -4,7 +4,7 @@ require('dotenv').config();
 const firebase = require('firebase/app');
 const { Player } = require("discord-player");
 
-const isDev = true;
+const isDev = false;
 
 let guild = null;
 let token = null;
@@ -42,7 +42,11 @@ firebase.initializeApp({
 Client.SlashCommands = new discord.Collection();
 Client.aliases = new discord.Collection();
 Client.events = new discord.Collection();
-const player = new Player(Client);
+const player = new Player(Client, {
+  ytdlOptions: {
+    filter: 'audioonly',
+  },
+});
 
 module.exports.player = player;
 module.exports.Client = Client;
@@ -90,4 +94,8 @@ Client.on('error', (err) => {
 });
 
 Client.login(token);
-process.on("unhandledRejection", error => console.error("Promise rejection:", error));
+ 
+// process.on("unhandledRejection", error => console.error("Promise rejection:", error));
+player.on("error", (queue, error) => {
+  console.log(`Error at ${queue.guild.id} | ${error.message}`);
+});
