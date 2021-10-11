@@ -35,14 +35,14 @@ module.exports.play_command = async function (
     .search(query, {
       requestedBy: inter.user,
     })
-    .then((x) => x.tracks.slice(0, 10));
+    .then((x) => x.tracks.slice(0, 100));
 
   let tracksDuration = 0;
   const playerQueue = player.getQueue(inter.guildId);
   let secondsLeft = playerQueue.current ? playerQueue.current.durationMS : 0;
   queue.play(tracks[0]);
   const tracksQueue = playerQueue.tracks || [];
-  if (tracksQueue.length !== 0) {
+  if (tracksQueue.length !== 0 && tracksQueue.length <= 10) {
     tracksQueue.slice(0, 10).forEach((track) => {
       secondsLeft += track.durationMS;
     });
