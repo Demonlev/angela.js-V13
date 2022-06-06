@@ -49,7 +49,7 @@ module.exports.run = async (inter) => {
   let cardInfo;
 
   if (interString.match(/^\d+$/g)) {
-    cardInfo = card.docs[0].data();
+    cardInfo = resultDoc.docs[0].data();
   } else {
     const cardsIdArray = resultDoc.docs[0].data().cardsId;
     const cardId =
