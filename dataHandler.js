@@ -173,9 +173,9 @@ async function createCommand(Client, guildId) {
       description: 'Рандомные картинки.',
       options: [
         {
-          name: 'тег',
+          name: 'тег_ид',
           type: 'STRING',
-          description: 'Введите тег. Популярные теги: мем, кот, кошка, рыба, птица, акула, пиксель, змея.',
+          description: 'Введите тег или id#<число>. Популярные теги: мем, кот, кошка, рыба, птица, акула, пиксель, змея.',
           required: true
         }
       ]

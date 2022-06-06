@@ -8,7 +8,7 @@ require("firebase/firestore");
  * @param {CommandInteraction} inter
  */
 module.exports.run = async (inter) => {
-  const interString = inter.options.getString("тег");
+  const interString = inter.options.getString("тег_ид");
   if (!interString) {
     return await inter.reply({
       content: "Введите тег или id#<число>",
@@ -20,11 +20,11 @@ module.exports.run = async (inter) => {
   let card;
 
   if (interString.startsWith("id#")) {
-    const id = interString.substr(3);
+    const id = Number(interString.substr(3));
     resultDoc = await firebase
       .firestore()
       .collection("cards")
-      .where("id", "==", id)
+      .where("id", "==", Number(id))
       .limit(1)
       .get();
   } else {
