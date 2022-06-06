@@ -11,7 +11,7 @@ module.exports.run = async (inter) => {
   const interString = inter.options.getString("тег_ид");
   if (!interString) {
     return await inter.reply({
-      content: "Введите тег или id#<число>",
+      content: "Введите тег или айди",
       ephemeral: true,
     });
   }
@@ -19,8 +19,8 @@ module.exports.run = async (inter) => {
   let resultDoc;
   let card;
 
-  if (interString.startsWith("id#")) {
-    const id = Number(interString.substr(3));
+  if (interString.match(/^\d+$/g)) {
+    const id = Number(interString.match(/^\d+$/g)[0]);
     resultDoc = await firebase
       .firestore()
       .collection("cards")
