@@ -28,6 +28,8 @@ module.exports.run = async (inter) => {
       .limit(1)
       .get();
   } else {
+  const searchString =
+    interString.substr(0, 1).toUpperCase() + interString.substr(1);
     resultDoc = await firebase
       .firestore()
       .collection("albums")
@@ -35,9 +37,6 @@ module.exports.run = async (inter) => {
       .limit(1)
       .get();
   }
-
-  const searchString =
-    interString.substr(0, 1).toUpperCase() + interString.substr(1);
 
   if (resultDoc.empty) {
     return await inter.reply({
