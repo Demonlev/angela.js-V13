@@ -1,2 +1,2 @@
-worker: node index.js
-heroku ps:scale worker=1
+worker: npm start
+worker: npm build

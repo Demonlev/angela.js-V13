@@ -54,7 +54,7 @@ const rest = new REST({ version: "10" }).setToken(BOT_TOKEN);
 (async () => {
   try {
     handleCommands(commands, async (cmd) => {
-      await rest.put(Routes.applicationGuildCommands(BOT_APP, "797063032613634089"), {
+      await rest.put(Routes.applicationCommands(BOT_APP), {
         body: cmd,
       });
     });

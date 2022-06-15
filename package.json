@@ -10,8 +10,10 @@
   "scripts": {
     "start": "node build/index.js",
     "dev": "nodemon index.ts",
+    "postinstall": "tsx && tsx-alias",
     "build": "tsc && tsc-alias"
   },
+  "heroku-run-build-script": true,
   "nodemonConfig": {
     "ignore": [
       ".git",
