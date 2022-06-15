@@ -10,8 +10,8 @@
   "scripts": {
     "start": "node build/index.js",
     "dev": "nodemon index.ts",
-    "postinstall": "tsc && tsc-alias",
-    "build": "tsc && tsc-alias"
+    "postinstall": "tsc && tsc-alias && cp -r ./images/ ./build/images/ && cp -r ./json/ ./build/json/ && mkdir build/temp",
+    "build": "tsc && tsc-alias && cp -r ./images/ ./build/images/ && cp -r ./json/ ./build/json/ &&  mkdir build/temp"
   },
   "heroku-run-build-script": true,
   "nodemonConfig": {

@@ -231,23 +231,25 @@ async function searcherGoodSearch(inter: CommandInteraction, query: string) {
 }
 
 async function findError(inter: CommandInteraction, msg?: string) {
-  return await inter.editReply({ content: `Упс! ${msg ? msg : "Кажется ничего не найдено..."}` }).then((msg) => {
-    (msg as Message).react("🔟").then((msg) => {
-      setTimeout(() => {
-        msg.message.react("5️⃣").then((msg) => {
-          setTimeout(() => {
-            msg.message.react(getRandomEmoji()).then((msg) => {
-              msg.message.react("🔫").then((msg) => {
-                setTimeout(() => {
-                  msg.message.delete();
-                }, 1500);
+  try {
+    return await inter.editReply({ content: `Упс! ${msg ? msg : "Кажется ничего не найдено..."}` }).then((msg) => {
+      (msg as Message).react("🔟").then((msg) => {
+        setTimeout(() => {
+          msg.message.react("5️⃣").then((msg) => {
+            setTimeout(() => {
+              msg.message.react(getRandomEmoji()).then((msg) => {
+                msg.message.react("🔫").then((msg) => {
+                  setTimeout(() => {
+                    msg.message.delete();
+                  }, 1500);
+                });
               });
-            });
-          }, 4000);
-        });
-      }, 5000);
+            }, 4000);
+          });
+        }, 5000);
+      });
     });
-  });
+  } catch (error) {}
 }
 
 function getRandomEmoji() {
