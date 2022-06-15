@@ -1,31 +1,48 @@
 {
   "name": "angela.js-V13",
-  "version": "0.5",
-  "description": "Local Discord Bot",
+  "version": "0.6",
+  "description": "Discord bot",
   "main": "index.js",
-  "author": "RedDusty",
+  "repository": "https://github.com/RedDusty/angela.js-V13",
+  "author": "RedDusty <61934784+RedDusty@users.noreply.github.com>",
   "license": "MIT",
-  "private": true,
+  "private": false,
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js"
+    "start": "node build/index.js",
+    "dev": "nodemon index.ts",
+    "build": "tsc && tsc-alias"
   },
-  "dependencies": {
-    "@discordjs/opus": "^0.6.0",
-    "canvas": "^2.8.0",
-    "discord-player": "^5.1.0",
-    "discord-together": "^1.1.62",
-    "discord-ytdl-core": "^5.0.4",
-    "discord.js": "^13.1.0",
-    "dotenv": "^10.0.0",
-    "ffmpeg-static": "^4.4.0",
-    "firebase": "^8.9.1",
-    "fs": "^0.0.1-security"
+  "nodemonConfig": {
+    "ignore": [
+      ".git",
+      "node_modules"
+    ],
+    "watch": [
+      "."
+    ],
+    "exec": "node -r tsconfig-paths/register -r ts-node/register ./index.ts",
+    "ext": "js, ts"
   },
   "devDependencies": {
-    "nodemon": "^2.0.12"
+    "@types/request": "^2.48.8",
+    "nodemon": "^2.0.16",
+    "ts-node": "^10.8.1",
+    "tsc-alias": "^1.6.9",
+    "tsconfig-paths": "^4.0.0",
+    "typescript": "^4.7.3"
   },
-  "engines": {
-    "node": "16.6.2"
+  "dependencies": {
+    "@discordjs/builders": "^0.15.0",
+    "@discordjs/rest": "^0.5.0",
+    "@discordjs/voice": "^0.10.0",
+    "axios": "^0.27.2",
+    "canvas": "^2.9.1",
+    "cheerio": "^1.0.0-rc.11",
+    "discord-api-types": "^0.34.0",
+    "discord.js": "^13.8.0",
+    "dotenv": "^16.0.1",
+    "firebase-admin": "^10.3.0",
+    "puppeteer": "^14.4.0",
+    "request": "^2.88.2"
   }
 }
