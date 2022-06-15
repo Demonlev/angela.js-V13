@@ -240,15 +240,15 @@ async function findError(inter: CommandInteraction, msg?: string) {
               msg.message.react(getRandomEmoji()).then((msg) => {
                 msg.message.react("🔫").then((msg) => {
                   setTimeout(() => {
-                    msg.message.delete();
+                    msg.message.delete().catch((e) => {});
                   }, 1500);
-                });
-              });
+                }).catch((e) => {});
+              }).catch((e) => {});
             }, 4000);
-          });
+          }).catch((e) => {});
         }, 5000);
-      });
-    });
+      }).catch((e) => {});
+    }).catch((e) => {});
   } catch (error) {}
 }
 

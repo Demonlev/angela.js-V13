@@ -1,7 +1,5 @@
 import puppeteer from "puppeteer";
 import { load } from "cheerio";
-import fs from 'node:fs'
-import path from 'node:path'
 import { isNum, __globaldirname } from "@utils/utils";
 
 type pinType = null | {
