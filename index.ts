@@ -6,7 +6,7 @@ import { Routes } from "discord-api-types/v10";
 import { REST } from "@discordjs/rest";
 
 const BOT_TOKEN = process.env.TOKEN || "";
-const BOT_APP = "876557518355198002";
+const BOT_APP = process.env.APP || "";
 const ID_ADMINS = [341647130294747137, 485033648672735253];
 
 class DisClient extends discord.Client {
