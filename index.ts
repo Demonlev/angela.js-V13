@@ -7,6 +7,7 @@ import { REST } from "@discordjs/rest";
 
 const BOT_TOKEN = process.env.TOKEN || "";
 const BOT_APP = process.env.APP || "";
+const GUILD_ID = process.env.GUILD_ID || "";
 const ID_ADMINS = [341647130294747137, 485033648672735253];
 
 class DisClient extends discord.Client {
@@ -54,7 +55,7 @@ const rest = new REST({ version: "10" }).setToken(BOT_TOKEN);
 (async () => {
   try {
     handleCommands(commands, async (cmd) => {
-      await rest.put(Routes.applicationCommands(BOT_APP), {
+      await rest.put(Routes.applicationGuildCommands(BOT_APP, GUILD_ID), {
         body: cmd,
       });
     });
