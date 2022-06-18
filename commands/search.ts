@@ -1,6 +1,6 @@
 import { CommandInteraction, Message, MessageEmbed } from "discord.js";
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { isNum, sysColor, __globaldirname } from "utils/utils";
+import { findError, isNum, sysColor, __globaldirname } from "utils/utils";
 import pinParser from "@utils/pinParser";
 import axios from "axios";
 import { firebase } from "@utils/firebase";
@@ -228,31 +228,4 @@ async function searcherGoodSearch(inter: CommandInteraction, query: string) {
   } else {
     return await findError(inter);
   }
-}
-
-async function findError(inter: CommandInteraction, msg?: string) {
-  try {
-    return await inter.editReply({ content: `Упс! ${msg ? msg : "Кажется ничего не найдено..."}` }).then((msg) => {
-      (msg as Message).react("🔟").then((msg) => {
-        setTimeout(() => {
-          msg.message.react("5️⃣").then((msg) => {
-            setTimeout(() => {
-              msg.message.react(getRandomEmoji()).then((msg) => {
-                msg.message.react("🔫").then((msg) => {
-                  setTimeout(() => {
-                    msg.message.delete().catch((e) => {});
-                  }, 1500);
-                }).catch((e) => {});
-              }).catch((e) => {});
-            }, 4000);
-          }).catch((e) => {});
-        }, 5000);
-      }).catch((e) => {});
-    }).catch((e) => {});
-  } catch (error) {}
-}
-
-function getRandomEmoji() {
-  const emojis = ["😉", "🙃", "😃", "😢", "🎃", "🤖", "🤡"];
-  return emojis[Math.floor(Math.random() * emojis.length)];
 }

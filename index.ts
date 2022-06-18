@@ -4,17 +4,18 @@ import "dotenv/config";
 import discord, { Collection, Interaction } from "discord.js";
 import { Routes } from "discord-api-types/v10";
 import { REST } from "@discordjs/rest";
+import { guildQueryType } from "@player/player";
 
 const BOT_TOKEN = process.env.TOKEN || "";
 const BOT_APP = process.env.APP || "";
-const GUILD_ID = process.env.GUILD_ID || "";
 const ID_ADMINS = [341647130294747137, 485033648672735253];
+export const guildsQuries: Map<string, guildQueryType> = new Map();
 
 class DisClient extends discord.Client {
   commands: Collection<unknown, any> = new Collection();
 }
 
-const Client = new DisClient({
+export const Client = new DisClient({
   intents: [
     discord.Intents.FLAGS.GUILDS,
     discord.Intents.FLAGS.GUILD_MEMBERS,
@@ -55,7 +56,7 @@ const rest = new REST({ version: "10" }).setToken(BOT_TOKEN);
 (async () => {
   try {
     handleCommands(commands, async (cmd) => {
-      await rest.put(Routes.applicationGuildCommands(BOT_APP, GUILD_ID), {
+      await rest.put(Routes.applicationCommands(BOT_APP), {
         body: cmd,
       });
     });
@@ -72,7 +73,12 @@ Client.on("interactionCreate", async (inter: Interaction) => {
     await command.execute(inter);
   } catch (error) {
     console.log(`[inter_error] - ${error}`);
-    await inter.reply({ content: "Что-то пошло не так! Проверьте написание команды.", ephemeral: true });
+    const ephemeral = inter.ephemeral !== null ? inter.ephemeral : false;
+    if (inter.deferred) {
+      await inter.followUp({ content: "Что-то пошло не так! Проверьте написание команды.", ephemeral: ephemeral });
+    } else {
+      await inter.reply({ content: "Что-то пошло не так! Проверьте написание команды.", ephemeral: ephemeral });
+    }
   }
 });
 

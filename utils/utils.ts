@@ -1,4 +1,5 @@
-import path from 'node:path';
+import { CommandInteraction, Message } from "discord.js";
+import path from "node:path";
 
 type sysColorType = "green" | "yellow" | "red";
 export function sysColor(type: sysColorType) {
@@ -34,4 +35,64 @@ export const __globaldirname = path.join(__dirname, "..");
 export function isNum(str: any) {
   const num = Number(str);
   return !isNaN(num);
+}
+
+export async function findError(inter: CommandInteraction, msg?: string, oopsRemove?: boolean, instant?: boolean) {
+  try {
+    return await inter
+      .editReply({ content: `${oopsRemove ? "" : "Упс!"} ${msg ? msg : "Кажется ничего не найдено..."}` })
+      .then((msg) => {
+        if (instant === true) {
+          try {
+            (msg as Message).delete();
+            return;
+          } catch (error) {}
+        }
+        (msg as Message)
+          .react("🔟")
+          .then((msg) => {
+            setTimeout(() => {
+              msg.message
+                .react("5️⃣")
+                .then((msg) => {
+                  setTimeout(() => {
+                    msg.message
+                      .react(getRandomEmoji())
+                      .then((msg) => {
+                        msg.message
+                          .react("🔫")
+                          .then((msg) => {
+                            setTimeout(() => {
+                              msg.message.delete().catch((e) => {});
+                            }, 1500);
+                          })
+                          .catch((e) => {});
+                      })
+                      .catch((e) => {});
+                  }, 4000);
+                })
+                .catch((e) => {});
+            }, 5000);
+          })
+          .catch((e) => {});
+      })
+      .catch((e) => {});
+  } catch (error) {}
+}
+
+function getRandomEmoji() {
+  const emojis = ["😉", "🙃", "😃", "😢", "🎃", "🤖", "🤡"];
+  return emojis[Math.floor(Math.random() * emojis.length)];
+}
+
+export function isValidHttpUrl(str: string) {
+  let url;
+
+  try {
+    url = new URL(str);
+  } catch (_) {
+    return false;
+  }
+
+  return url.protocol === "http:" || url.protocol === "https:";
 }
