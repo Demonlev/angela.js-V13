@@ -47,34 +47,35 @@ export async function findError(inter: CommandInteraction, msg?: string, oopsRem
             if ((msg as Message).deletable) (msg as Message).delete().catch((e) => {});
             return;
           } catch (error) {}
+        } else {
+          (msg as Message)
+            .react("🔟")
+            .then((msg) => {
+              setTimeout(() => {
+                msg.message
+                  .react("5️⃣")
+                  .then((msg) => {
+                    setTimeout(() => {
+                      msg.message
+                        .react(getRandomEmoji())
+                        .then((msg) => {
+                          msg.message
+                            .react("🔫")
+                            .then((msg) => {
+                              setTimeout(() => {
+                                if (msg.message.deletable) msg.message.delete().catch((e) => {});
+                              }, 1500);
+                            })
+                            .catch((e) => {});
+                        })
+                        .catch((e) => {});
+                    }, 4000);
+                  })
+                  .catch((e) => {});
+              }, 5000);
+            })
+            .catch((e) => {});
         }
-        (msg as Message)
-          .react("🔟")
-          .then((msg) => {
-            setTimeout(() => {
-              msg.message
-                .react("5️⃣")
-                .then((msg) => {
-                  setTimeout(() => {
-                    msg.message
-                      .react(getRandomEmoji())
-                      .then((msg) => {
-                        msg.message
-                          .react("🔫")
-                          .then((msg) => {
-                            setTimeout(() => {
-                              if (msg.message.deletable) msg.message.delete().catch((e) => {});
-                            }, 1500);
-                          })
-                          .catch((e) => {});
-                      })
-                      .catch((e) => {});
-                  }, 4000);
-                })
-                .catch((e) => {});
-            }, 5000);
-          })
-          .catch((e) => {});
       })
       .catch((e) => {});
   } catch (error) {}

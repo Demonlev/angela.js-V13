@@ -6,24 +6,29 @@ import { ID_ADMINS } from "index";
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("purge")
-    .setDescription("Выебать сообщения.")
-    .addNumberOption((option) => option.setName("количество").setDescription("сколько выебать").setRequired(true)),
+    .setDescription("Удалить сообщения.")
+    .addNumberOption((option) => option.setName("количество").setDescription("Сколько удалить?").setRequired(true)),
   async execute(inter: CommandInteraction) {
-    inter.deferReply();
+    await inter.deferReply();
     const count = inter.options.getNumber("количество");
+
     if (inter.guild && inter.member) {
       if (inter.guild.ownerId === inter.member.user.id || ID_ADMINS.includes(inter.member.user.id)) {
         if (inter.channel) {
-          const deleteCount = count || 5;
+          const deleteCount = (count || 5) + 1;
           const messages = await inter.channel.messages.fetch({ limit: deleteCount });
           try {
             messages.each((m) => m.delete());
-            return findError(inter, `Удалено ${deleteCount} сообщений`, true);
-          } catch (error) {}
+            return await findError(inter, `Удалено ${deleteCount} сообщений`, true);
+          } catch (error) {
+            return await findError(inter, "Вы не можете использовать эту команду");
+          }
         }
       }
+    } else if (inter.guildId === null && inter.user) {
+      return await findError(inter, "Эта команда только для гильдий!");
     }
 
-    return findError(inter, "Вы не можете использовать эту команду");
+    return await findError(inter, "Вы не можете использовать эту команду");
   },
 };

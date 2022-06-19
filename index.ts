@@ -21,11 +21,16 @@ export const Client = new DisClient({
     discord.Intents.FLAGS.GUILD_MEMBERS,
     discord.Intents.FLAGS.GUILD_MESSAGES,
     discord.Intents.FLAGS.GUILD_VOICE_STATES,
+    discord.Intents.FLAGS.DIRECT_MESSAGES,
+    discord.Intents.FLAGS.DIRECT_MESSAGE_TYPING,
   ],
   allowedMentions: { parse: ["users", "roles"], repliedUser: true },
 });
 
 Client.commands = new Collection();
+if (Client.application) {
+  Client.application.commands.set([]);
+}
 const commands: any[] = [];
 
 function handleCommands(arr: any[], callback: (data: any[]) => void) {
