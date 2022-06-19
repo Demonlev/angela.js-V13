@@ -19,14 +19,7 @@ import {
   createAudioResource,
   AudioResource,
 } from "@discordjs/voice";
-import {
-  EngineType,
-  isContainBotMessageType,
-  historyType,
-  playerHistoryType,
-  sendMessagePlayerType,
-  cmdHistoryType,
-} from "@player/player";
+import { EngineType, isContainBotMessageType, playerHistoryType, sendMessagePlayerType, cmdHistoryType } from "@player/player";
 import ytdl from "ytdl-core";
 import ytsr from "youtube-sr";
 import { isValidHttpUrl } from "@utils/utils";
@@ -45,11 +38,32 @@ export class Player {
   public messageHistoryQuery: playerHistoryType | null = null;
   private subscription: PlayerSubscription | undefined;
   public Client!: Client;
-  public isPaused: boolean = true;
+  public isPaused: boolean = false;
   public queryDuration: number = 0;
 
   constructor(inter: CommandInteraction, query: string, engine: EngineType) {
     this.initiatePlayer(inter, query, engine);
+    if (inter.channel) this.initiateMessages(inter.channel);
+  }
+
+  public initiateMessages(channel: TextBasedChannel) {
+    const embedAudio = new MessageEmbed();
+    embedAudio.setAuthor({ name: "Плеер - 💠 инициализация 💠" });
+    embedAudio.setTitle("Инициализация");
+    embedAudio.setDescription("Загружаем треки...");
+    embedAudio.setFooter({ text: "Audio Player" });
+    embedAudio.setColor("RANDOM");
+    embedAudio.setTimestamp(new Date());
+
+    const embedHistory = new MessageEmbed();
+    embedHistory.setTitle("💠 Инициализация 💠");
+    embedHistory.setDescription("Загружаем треки...");
+    embedHistory.setColor("RANDOM");
+    embedHistory.setTimestamp(new Date());
+    embedHistory.setFooter({ text: "Player History" });
+
+    channel.send({ content: null, embeds: [embedAudio] });
+    channel.send({ content: null, embeds: [embedHistory] });
   }
 
   public addTrack(track: Track) {
@@ -69,14 +83,8 @@ export class Player {
     this.guildQuery = this.guildQuery.sort(() => Math.random() - 0.5);
     if (user) {
       this.addCmdHistory("shuffle", user);
-      return this.sendMessagePlayer({
-        extraField: {
-          title: "Перемешиваем очередь",
-          description: `Перемешал - ${user.tag}`,
-        },
-      });
     }
-    return this.sendMessagePlayer();
+    return;
   }
 
   public pause(user: User, isPause: boolean | null) {
@@ -85,27 +93,15 @@ export class Player {
       this.audioPlayer.unpause();
       if (user) {
         this.addCmdHistory("pause", user);
-        return this.sendMessagePlayer({
-          extraField: {
-            title: "Возобновляем плеер",
-            description: `Возобновил - ${user.tag}`,
-          },
-        });
       }
     } else {
-      this.isPaused = isPause || true;
+      this.isPaused = true;
       this.audioPlayer.pause(true);
       if (user) {
         this.addCmdHistory("unpause", user);
-        return this.sendMessagePlayer({
-          extraField: {
-            title: "Останавливаем плеер",
-            description: `Остановил - ${user.tag}`,
-          },
-        });
       }
     }
-    return this.sendMessagePlayer();
+    return;
   }
 
   public joinVoice(channelVoice: VoiceBasedChannel | null) {
@@ -127,6 +123,9 @@ export class Player {
       } else {
         this.joinVoice(userChannel);
       }
+    }
+    if (inter.channel && this.channelText && inter.channel.id !== this.channelText.id) {
+      this.channelText = inter.channel;
     }
     let isLink = isValidHttpUrl(query);
 
@@ -214,15 +213,6 @@ export class Player {
 
   private async sendMessagePlayer(arg?: sendMessagePlayerType) {
     const playableTrack = arg?.track || this.currentTrack;
-    let isEditMessagePlayer = false;
-    if (this.channelText) {
-      const messages = await this.channelText.messages.fetch({ limit: 3 });
-      const { isContain, message } = this.isContainBotMessages(messages.reverse(), this.Client, "Audio Player");
-      isEditMessagePlayer = isContain;
-      if (isContain) {
-        this.messagePlayer = message;
-      }
-    }
 
     const embed = this.createEmbedPlayer();
     if (arg?.added && playableTrack) {
@@ -232,6 +222,15 @@ export class Player {
         `Добавлено - ${title} - ${getDurationFancy(playableTrack.duration)}`,
         `${author.tag} поставил в очередь трек`
       );
+    }
+    let isEditMessagePlayer = false;
+    if (this.channelText) {
+      const messages = await this.channelText.messages.fetch({ limit: 3 });
+      const { isContain, message } = this.isContainBotMessages(messages.reverse(), this.Client, "Audio Player");
+      isEditMessagePlayer = isContain;
+      if (isContain) {
+        this.messagePlayer = message;
+      }
     }
     if (this.messagePlayer && isEditMessagePlayer) {
       this.messagePlayer.edit({ content: null, embeds: [embed] });
@@ -253,7 +252,11 @@ export class Player {
     embed.setColor("RANDOM");
     embed.setTimestamp(new Date());
     if (track) {
-      embed.setAuthor({ name: "Плеер - играет" });
+      if (this.isPaused === true) {
+        embed.setAuthor({ name: "Плеер - ⏸️ на паузе ⏸️" });
+      } else {
+        embed.setAuthor({ name: "Плеер - 🎶 играет 🎶" });
+      }
       if (track.thumbnail) embed.setThumbnail(track.thumbnail);
       const inQueryField = this.guildQuery.length
         ? `${this.guildQuery.length} трек(а/ов) - ${getDurationFancy(this.queryDuration)}`
@@ -274,7 +277,7 @@ export class Player {
       }
     } else if (this.currentTrack === null && this.guildQuery.length === 0) {
       embed.setTitle("Используйте команды");
-      embed.setAuthor({ name: "Плеер - пусто" });
+      embed.setAuthor({ name: "Плеер - ⏹️ пусто ⏹️" });
       embed.addField("/m play {query}", "Ссылка или запрос", false);
     }
 
@@ -365,6 +368,9 @@ export class Player {
   public async getHistory(history?: playerHistoryType | null, inter?: CommandInteraction) {
     this.messageHistoryQuery = history || null;
     let isEditMessage = false;
+    if (inter && inter.channel && this.channelText && inter.channel.id !== this.channelText.id) {
+      this.channelText = inter.channel;
+    }
     if (this.channelText) {
       const messages = await this.channelText.messages.fetch({ limit: 3 });
       const isContain = this.isContainBotMessages(messages, this.Client, "Player History");
@@ -496,12 +502,3 @@ class Track {
     this.resource = resource;
   }
 }
-
-const getTimeFancy = (time?: number) =>
-  new Date(time || new Date().getTime()).toLocaleTimeString("default", {
-    weekday: "short",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  });
