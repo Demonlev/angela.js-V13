@@ -44,7 +44,7 @@ export async function findError(inter: CommandInteraction, msg?: string, oopsRem
       .then((msg) => {
         if (instant === true) {
           try {
-            (msg as Message).delete();
+            if ((msg as Message).deletable) (msg as Message).delete().catch((e) => {});
             return;
           } catch (error) {}
         }
@@ -63,7 +63,7 @@ export async function findError(inter: CommandInteraction, msg?: string, oopsRem
                           .react("🔫")
                           .then((msg) => {
                             setTimeout(() => {
-                              msg.message.delete().catch((e) => {});
+                              if (msg.message.deletable) msg.message.delete().catch((e) => {});
                             }, 1500);
                           })
                           .catch((e) => {});
