@@ -74,7 +74,7 @@ module.exports = {
       switch (subcommand) {
         case "play":
           const res = await player.search(query!, engine, inter);
-          if (res) return findError(inter, `Вы не можете добавлять треки, находясь в другом канале, пока в этом есть люди`)
+          if (res) return findError(inter, `Вы не можете добавлять треки, находясь в этом канале, пока в другом есть люди`)
           return findError(inter, `${inter.user.username} добавил трек: **${query}**`, true, true);
         case "skip":
           player.playNextQuery(inter.user);

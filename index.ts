@@ -8,7 +8,7 @@ import { guildQueryType } from "@player/player";
 
 const BOT_TOKEN = process.env.TOKEN || "";
 const BOT_APP = process.env.APP || "";
-const ID_ADMINS = [341647130294747137, 485033648672735253];
+export const ID_ADMINS = ["341647130294747137", "485033648672735253"];
 export const guildsQuries: Map<string, guildQueryType> = new Map();
 
 class DisClient extends discord.Client {
