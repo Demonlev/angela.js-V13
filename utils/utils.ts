@@ -97,3 +97,15 @@ export function isValidHttpUrl(str: string) {
 
   return url.protocol === "http:" || url.protocol === "https:";
 }
+
+export function getValidHttpUrl(str: string) {
+  let url
+
+  try {
+    url = new URL(str);
+  } catch (_) {
+    return false;
+  }
+
+  return url.href;
+}

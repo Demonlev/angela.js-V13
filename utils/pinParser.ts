@@ -1,6 +1,8 @@
 import puppeteer from "puppeteer";
 import { load } from "cheerio";
-import { isNum, __globaldirname } from "@utils/utils";
+import { isNum, isValidHttpUrl, __globaldirname } from "@utils/utils";
+import fs from "node:fs";
+import path from "node:path";
 
 type pinType = null | {
   url?: string;
@@ -10,19 +12,20 @@ type pinType = null | {
   isGIF: boolean;
 };
 
-const urlMatch =
-  /\b((?:[a-z][\w-]+:(?:\/{1,3}|[a-z0-9%])|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}\/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'".,<>?«»“”‘’]))/gi;
+type ModeType = "slow" | "medium" | "fast";
 
-export default async function pinParser(query: string) {
+export default async function pinParser(query: string, mode: ModeType | null = "medium") {
+  if (mode === null || mode === undefined) mode = "medium";
+  const sizeVW = mode === "fast" ? 1024 : mode === "medium" ? 1536 : 2048;
   const browser = await puppeteer.launch({
     headless: true,
-    args: ["--no-sandbox", "--window-size=2048,2048"],
-    defaultViewport: { width: 2048, height: 2048 },
+    args: ["--no-sandbox", `--window-size=${sizeVW},${sizeVW}`],
+    defaultViewport: { width: sizeVW, height: sizeVW },
   });
   let pin: pinType = null;
   try {
     const page = await browser.newPage();
-    if (query.match(urlMatch)) {
+    if (isValidHttpUrl(query)) {
       const idReg = query.match(/\d+/g);
       if (idReg && idReg[0]) {
         pin = await parseByID(idReg[0], page, pin);
@@ -33,7 +36,7 @@ export default async function pinParser(query: string) {
         pin = await parseByID(idReg[0], page, pin);
       }
     } else {
-      pin = await parseByTags(query, page, pin);
+      pin = await parseByTags(query, page, pin, mode);
     }
   } catch (error) {
     browser.close();
@@ -44,14 +47,18 @@ export default async function pinParser(query: string) {
   return null;
 }
 
-async function parseByTags(tags: string, page: puppeteer.Page, pin: pinType) {
+async function parseByTags(tags: string, page: puppeteer.Page, pin: pinType, mode: ModeType) {
+  const waitUntil = mode === "fast" ? "load" : mode === "medium" ? "networkidle2" : "networkidle0";
   await page.goto(`https://www.pinterest.ru/search/pins/?q=${tags}&rs=typo_auto_original&auto_correction_disabled=true`, {
-    waitUntil: "networkidle0",
+    waitUntil: waitUntil,
   });
-  const bodyHTML = await page.evaluate(() => {
-    window.scrollBy(0, window.innerHeight);
+  const bodyHTML = await page.evaluate((mode) => {
+    if (mode !== "fast") {
+      window.scrollBy(0, window.innerHeight);
+    }
     return document.body.innerHTML;
-  });
+  }, mode);
+  fs.writeFileSync(path.join(__globaldirname, "temp", "temp.html"), bodyHTML);
   const bodyCheerio = load(bodyHTML);
   const items = bodyCheerio("div.Yl-");
   if (items.length !== 0) {

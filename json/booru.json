@@ -1,0 +1,83 @@
+{
+    "api.rule34.xxx": {
+        "domain": "api.rule34.xxx",
+        "nsfw": true,
+        "data": "json",
+        "api": {
+            "search": "/index.php?page=dapi&s=post&q=index&json=1&limit=500&",
+            "post": "/index.php?page=post&s=view&json=1&id="
+        }
+    },
+    "rule34.paheal.net": {
+        "domain": "rule34.paheal.net",
+        "nsfw": true,
+        "data": "xml",
+        "api": {
+            "search": "/api/danbooru/find_posts/index.xml?limit=100&",
+            "post": "/post/view/"
+        }
+    },
+    "safebooru.org": {
+        "domain": "safebooru.org",
+        "nsfw": false,
+        "data": "json",
+        "api": {
+            "search": "/index.php?page=dapi&s=post&q=index&limit=100&json=1&",
+            "post": "/index.php?page=post&s=view&json=1&id="
+        }
+    },
+    "xbooru.com": {
+        "domain": "xbooru.com",
+        "nsfw": true,
+        "data": "json",
+        "api": {
+            "search": "/index.php?page=dapi&s=post&q=index&limit=100&json=1&",
+            "post": "/index.php?page=post&s=view&json=1&id="
+        }
+    },
+    "tbib.org": {
+        "domain": "tbib.org",
+        "nsfw": true,
+        "data": "json",
+        "api": {
+            "search": "/index.php?page=dapi&s=post&q=index&limit=100&json=1&",
+            "post": "/index.php?page=post&s=view&json=1&id="
+        }
+    },
+    "konachan.com": {
+        "domain": "konachan.com",
+        "nsfw": true,
+        "data": "json",
+        "api": {
+            "search": "/post.json?limit=100&",
+            "post": "/post/show/"
+        }
+    },
+    "konachan.net": {
+        "domain": "konachan.net",
+        "nsfw": false,
+        "data": "json",
+        "api": {
+            "search": "/post.json?limit=100&",
+            "post": "/post/show/"
+        }
+    },
+    "danbooru.donmai.us": {
+        "domain": "danbooru.donmai.us",
+        "nsfw": true,
+        "data": "json",
+        "api": {
+            "search": "/posts.json?limit=200&",
+            "post": "/posts/"
+        }
+    },
+    "hypnohub.net": {
+        "domain": "hypnohub.net",
+        "nsfw": true,
+        "data": "json",
+        "api": {
+            "search": "/index.php?page=dapi&s=post&q=index&limit=500&json=1&",
+            "post": "/post/show/"
+        }
+    }
+}
