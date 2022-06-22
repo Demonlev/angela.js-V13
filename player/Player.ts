@@ -67,7 +67,7 @@ export class Player {
   }
 
   public addTrack(track: Track) {
-    this.addCmdHistory("play", track.addedBy);
+    this.addCmdHistory("play - " + track.title || track.url, track.addedBy);
     this.getHistory();
     if (this.guildQuery.length === 0 && this.currentTrack === null) {
       this.playTrack(track);
@@ -129,14 +129,12 @@ export class Player {
     }
     let isLink = isValidHttpUrl(query);
 
-    const ytdlVideo = async (url: string) => {
+    const ytdlInfo = async (url: string) => {
       try {
-        const downloadResult = ytdl(url, { filter: "audioonly", quality: "highestaudio" });
         const info = await ytdl.getInfo(url);
         const v = info.videoDetails;
-        const resource = createAudioResource(downloadResult);
         const thumbnails = v.thumbnails.sort((a, b) => b.width - a.width);
-        const track = new Track(v.title, url, Number(v.lengthSeconds), thumbnails[0].url, engine, inter.user, resource);
+        const track = new Track(v.title, url, Number(v.lengthSeconds), thumbnails[0].url, engine, inter.user);
         this.addTrack(track);
       } catch (error) {}
     };
@@ -148,13 +146,13 @@ export class Player {
           if (searchResult && searchResult[0].type === "video") {
             const v = searchResult[0];
             try {
-              ytdlVideo(v.url);
+              ytdlInfo(v.url);
             } catch (error) {}
             return;
           } else if (searchResult[0].type === "playlist") {
             const v = searchResult[0].videos.slice(0, 15);
             for (let idx = 0; idx < v.length; idx++) {
-              ytdlVideo(v[idx].url);
+              ytdlInfo(v[idx].url);
             }
             return;
           }
@@ -165,7 +163,7 @@ export class Player {
     } else {
       switch (engine) {
         case "youtube":
-          ytdlVideo(query);
+          ytdlInfo(query);
           return;
         default:
           return;
@@ -173,11 +171,26 @@ export class Player {
     }
   }
 
+  private downloadTrack(url: string) {
+    try {
+      const dtrack = ytdl(url, { filter: "audioonly", quality: "highestaudio" });
+      const resource = createAudioResource(dtrack);
+      return resource;
+    } catch (error) {}
+
+    return null;
+  }
+
   private playTrack(track?: Track) {
     this.audioPlayer.stop();
     if (track) {
-      this.audioPlayer.play(track.resource);
-      this.currentTrack = track;
+      const resource = this.downloadTrack(track.url);
+      if (resource) {
+        this.audioPlayer.play(resource);
+        this.currentTrack = track;
+      } else {
+        this.playNextQuery();
+      }
     }
   }
 
@@ -233,13 +246,16 @@ export class Player {
       }
     }
     if (this.messagePlayer && isEditMessagePlayer) {
-      this.messagePlayer.edit({ content: null, embeds: [embed] });
+      this.messagePlayer.edit({ content: null, embeds: [embed] }).then(async (msg) => {
+        const messages = await msg.channel.messages.fetch({ limit: 25 });
+        this.deleteOtherBotMessages(messages, this.Client, "Audio Player", msg);
+      });
     } else if (this.channelText) {
-      try {
-        const messages = await this.channelText.messages.fetch({ limit: 25 });
-        await this.deleteOtherBotMessages(messages, this.Client, "Audio Player");
-      } catch (error) {}
-      this.channelText.send({ content: null, embeds: [embed] }).then((msg) => (this.messagePlayer = msg));
+      this.channelText.send({ content: null, embeds: [embed] }).then(async (msg) => {
+        this.messagePlayer = msg;
+        const messages = await msg.channel.messages.fetch({ limit: 25 });
+        this.deleteOtherBotMessages(messages, this.Client, "Audio Player", msg);
+      });
     }
 
     return embed;
@@ -264,7 +280,7 @@ export class Player {
       embed.addField("Длительность", getDurationFancy(track.duration), true);
       embed.addField("В очереди", inQueryField, true);
       embed.setTitle(track.title || track.url);
-      embed.setDescription(`Добавил - <@${track.addedBy.id}>`);
+      embed.setDescription(`Добавил(а) - <@${track.addedBy.id}>`);
       embed.setURL(track.url);
       const avatarURL = track.addedBy.avatarURL({ size: 64, dynamic: true });
       if (avatarURL) {
@@ -307,12 +323,10 @@ export class Player {
     this.audioPlayer.on<"stateChange">("stateChange", (oldState, newState) => {
       if (this.channelText) {
         if (oldState.status === AudioPlayerStatus.AutoPaused && newState.status === AudioPlayerStatus.Playing) {
-          this.sendMessagePlayer();
           this.isPaused = false;
         } else if (newState.status === AudioPlayerStatus.Idle) {
           this.playNextQuery();
         } else if (oldState.status === AudioPlayerStatus.Buffering && newState.status === AudioPlayerStatus.Playing) {
-          this.sendMessagePlayer();
           this.isPaused = false;
         }
       }
@@ -326,7 +340,7 @@ export class Player {
   ): isContainBotMessageType {
     let isContain = false;
     let message: Message | null = null;
-    messages.each((m) => {
+    messages.reverse().each((m) => {
       try {
         if (m.embeds[0].footer && m.client.user && Client.user) {
           const footer = m.embeds[0].footer.text === footerText;
@@ -345,18 +359,24 @@ export class Player {
     };
   }
 
-  private deleteOtherBotMessages(messages: Collection<string, Message<boolean>>, Client: Client, footerText: string) {
+  private deleteOtherBotMessages(
+    messages: Collection<string, Message<boolean>>,
+    Client: Client,
+    footerText: string,
+    notDeleteMessage: Message | null
+  ) {
     messages.each((m) => {
-      try {
-        if (m.embeds && m.embeds[0].footer && m.client.user && Client.user) {
-          const footer = m.embeds[0].footer.text === footerText;
-          const isBot = m.client.user.bot;
-          const isAngela = m.author.tag === Client.user.tag;
-          if (footer && isBot && isAngela) {
-            if (m.deletable) m.delete().catch();
+      if (m.embeds && m.embeds[0] && m.embeds[0].footer && m.client.user && Client.user) {
+        const footer = m.embeds[0].footer.text === footerText;
+        const isBot = m.client.user.bot;
+        const isAngela = m.author.tag === Client.user.tag;
+        const isDeletable = notDeleteMessage ? notDeleteMessage.id !== m.id : true;
+        if (footer && isBot && isAngela && isDeletable) {
+          if (m.deletable) {
+            m.delete().catch(console.error);
           }
         }
-      } catch (error) {}
+      }
     });
   }
 
@@ -372,22 +392,26 @@ export class Player {
       this.channelText = inter.channel;
     }
     if (this.channelText) {
-      const messages = await this.channelText.messages.fetch({ limit: 3 });
-      const isContain = this.isContainBotMessages(messages, this.Client, "Player History");
+      const messagesThatContain = await this.channelText.messages.fetch({ limit: 3 });
+      const isContain = this.isContainBotMessages(messagesThatContain, this.Client, "Player History");
       isEditMessage = isContain.isContain;
       this.messageHistory = isContain.message;
-      if (isEditMessage === false) {
-        const messages = await this.channelText.messages.fetch({ limit: 25 });
-        await this.deleteOtherBotMessages(messages, this.Client, "Player History");
-      }
     }
 
     const embed = this.createEmbedHistory(inter ? inter.user.id : undefined);
 
     if (isEditMessage && this.messageHistory) {
-      return await this.messageHistory.edit({ content: null, embeds: [embed] });
+      return await this.messageHistory.edit({ content: null, embeds: [embed] }).then(async (msg) => {
+        this.messageHistory = msg;
+        const messages = await msg.channel.messages.fetch({ limit: 25 });
+        this.deleteOtherBotMessages(messages, this.Client, "Player History", msg);
+      });
     } else if (this.channelText) {
-      return await this.channelText.send({ content: null, embeds: [embed] }).then((msg) => (this.messageHistory = msg));
+      return await this.channelText.send({ content: null, embeds: [embed] }).then(async (msg) => {
+        this.messageHistory = msg;
+        const messages = await msg.channel.messages.fetch({ limit: 25 });
+        this.deleteOtherBotMessages(messages, this.Client, "Player History", msg);
+      });
     }
   }
 
@@ -482,7 +506,6 @@ class Track {
   thumbnail?: string;
   engine: EngineType;
   addedBy: User;
-  resource: AudioResource;
 
   constructor(
     title: string | undefined,
@@ -490,8 +513,7 @@ class Track {
     duration: number,
     thumbnail: string | undefined,
     engine: EngineType,
-    addedBy: User,
-    resource: AudioResource
+    addedBy: User
   ) {
     this.title = title;
     this.url = url;
@@ -499,6 +521,5 @@ class Track {
     this.thumbnail = thumbnail;
     this.engine = engine;
     this.addedBy = addedBy;
-    this.resource = resource;
   }
 }
