@@ -13,16 +13,16 @@ import {
   AudioPlayer,
   AudioPlayerStatus,
   createAudioPlayer,
+  createAudioResource,
   joinVoiceChannel,
   PlayerSubscription,
   VoiceConnection,
-  createAudioResource,
-  AudioResource,
 } from "@discordjs/voice";
 import { EngineType, isContainBotMessageType, playerHistoryType, sendMessagePlayerType, cmdHistoryType } from "@player/player";
-import ytdl from "ytdl-core";
 import ytsr from "youtube-sr";
 import { isValidHttpUrl } from "@utils/utils";
+import ytdl from "ytdl-core";
+import { exec as ytdlexec } from "youtube-dl-exec";
 
 export class Player {
   public channelVoice!: VoiceBasedChannel;
@@ -171,20 +171,10 @@ export class Player {
     }
   }
 
-  private downloadTrack(url: string) {
-    try {
-      const dtrack = ytdl(url, { filter: "audioonly", quality: "highestaudio" });
-      const resource = createAudioResource(dtrack);
-      return resource;
-    } catch (error) {}
-
-    return null;
-  }
-
   private playTrack(track?: Track) {
     this.audioPlayer.stop();
     if (track) {
-      const resource = this.downloadTrack(track.url);
+      const resource = createAudioResourceYTDLE(track.url);
       if (resource) {
         this.audioPlayer.play(resource);
         this.currentTrack = track;
@@ -255,6 +245,7 @@ export class Player {
         this.messagePlayer = msg;
         const messages = await msg.channel.messages.fetch({ limit: 25 });
         this.deleteOtherBotMessages(messages, this.Client, "Audio Player", msg);
+        msg.react;
       });
     }
 
@@ -497,6 +488,32 @@ function getDurationFancy(duration: number) {
   time += "" + minutes + ":" + (seconds < 10 ? "0" : "");
   time += "" + seconds;
   return time;
+}
+
+function createAudioResourceYTDLE(url: string) {
+  try {
+    const stream = ytdlexec(
+      url,
+      {
+        output: "-",
+        format: "bestaudio[ext=webm+acodec=opus+tbr>100]/bestaudio[ext=webm+acodec=opus]/bestaudio/best",
+        limitRate: "1M",
+        rmCacheDir: true,
+        verbose: true,
+      },
+      { stdio: ["ignore", "pipe", "ignore"] }
+    );
+
+    if (stream.stdout) {
+      const audioResource = createAudioResource(stream.stdout);
+
+      return audioResource;
+    }
+
+    return null;
+  } catch (error) {
+    return null;
+  }
 }
 
 class Track {
