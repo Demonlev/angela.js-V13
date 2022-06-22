@@ -1,8 +1,6 @@
 import puppeteer from "puppeteer";
 import { load } from "cheerio";
-import { isNum, isValidHttpUrl, __globaldirname } from "@utils/utils";
-import fs from "node:fs";
-import path from "node:path";
+import { isNum, isValidHttpUrl } from "@utils/utils";
 
 type pinType = null | {
   url?: string;
@@ -58,7 +56,6 @@ async function parseByTags(tags: string, page: puppeteer.Page, pin: pinType, mod
     }
     return document.body.innerHTML;
   }, mode);
-  fs.writeFileSync(path.join(__globaldirname, "temp", "temp.html"), bodyHTML);
   const bodyCheerio = load(bodyHTML);
   const items = bodyCheerio("div.Yl-");
   if (items.length !== 0) {

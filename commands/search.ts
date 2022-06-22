@@ -91,6 +91,12 @@ module.exports = {
               { name: "HypnoHub 🔞", value: "hypnohub.net" }
             )
         )
+    )
+    .addSubcommand((opt) =>
+      opt
+        .setName("dalle")
+        .setDescription("Генерирует картинки по запросу.")
+        .addStringOption((opt) => opt.setName("запрос").setDescription("Любой текст. Не более 100 букв.").setRequired(true))
     ),
   async execute(inter: CommandInteraction) {
     const where = inter.options.getSubcommand();
@@ -115,11 +121,49 @@ module.exports = {
         return searcherGoodSearch(inter, query);
       case "tags":
         return searcherTags(inter, query, site);
+      case "dalle":
+        return searcherDalle(inter, query);
       default:
         return await findError(inter, "Кажется Вы не указали где искать...");
     }
   },
 };
+
+async function searcherDalle(inter: CommandInteraction, query: string) {
+  const subquery = query.slice(0, 100);
+  await inter.followUp({
+    content: `🛠️  ${inter.user.tag}, Ваш запрос выполняется. Когда он будет готов, Вам придёт уведомление. Запрос: __${subquery}__  🛠️`,
+  });
+  const result = await axios.post("https://backend.craiyon.com/generate", {
+    prompt: subquery,
+  });
+
+  let file: MessageAttachment | null = null;
+  const cvs = Canvas.createCanvas(768, 768);
+  const ctx = cvs.getContext("2d");
+
+  if (fs.existsSync(path.join(__globaldirname, "temp", inter.user.id))) {
+    fs.rmSync(path.join(__globaldirname, "temp", inter.user.id), { recursive: true, force: true });
+  }
+
+  if (result && result.data && result.data.images && Array.isArray(result.data.images)) {
+    for (let idx = 0; idx < result.data.images.length; idx++) {
+      const base64 = result.data.images[idx];
+      const img = Buffer.from(base64, "base64");
+      const cvsImg = new Canvas.Image();
+      cvsImg.src = img;
+      ctx.drawImage(cvsImg, 256 * ~~(idx / 3), 256 * ~~(idx % 3), 256, 256);
+    }
+
+    file = new MessageAttachment(cvs.createPNGStream());
+
+    if (file !== null) {
+      return await inter.followUp({ content: `✅  <@${inter.user.id}> Всё готово! __${subquery}__  ✅`, files: [file] });
+    }
+  }
+
+  return await findError(inter, `❌  <@${inter.user.id}>, запрос: __${subquery}__ не смог обработаться... 😔  ❌`);
+}
 
 async function searcherTags(inter: CommandInteraction, query: string, site: string | null) {
   if (site === null) site = "safebooru.org";
