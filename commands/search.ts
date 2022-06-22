@@ -296,6 +296,9 @@ async function searcherBooru(inter: CommandInteraction, query: string, site: str
     if (post.nsfw && inter.guild && inter.channel && (inter.channel as TextChannel).nsfw === false) {
       return await bonkHorny(inter);
     }
+    if (post.nsfw && inter.guildId && inter.guildId === "682890408967274531") {
+      return await bonkHorny(inter, "В этой гильдии запрещены хорни штучки!");
+    }
     const tags = post.tags.join(" ");
     if (isVideo(post.image)) {
       const content = `**[${post.booru}]** - <${post.url}>\n\`\`\`[много тегов] ${
@@ -383,7 +386,7 @@ function isVideo(str: string) {
   return /^.*\.(mp4|ogg|wemb)$/g.test(str);
 }
 
-async function bonkHorny(inter: CommandInteraction) {
+async function bonkHorny(inter: CommandInteraction, text?: string) {
   const cvs = Canvas.createCanvas(600, 461);
   const ctx = cvs.getContext("2d");
   ctx.fillStyle = "#ffffff";
@@ -418,5 +421,5 @@ async function bonkHorny(inter: CommandInteraction) {
 
   fs.writeFileSync(path.join(__globaldirname, "temp", `bonk_horny.png`), buffer);
   const file = new MessageAttachment(path.join(__globaldirname, "temp", `bonk_horny.png`));
-  return await inter.editReply({ content: "На этом канале запрещены хорни штучки!", files: [file] });
+  return await inter.editReply({ content: text ? text : "На этом канале запрещены хорни штучки!", files: [file] });
 }
