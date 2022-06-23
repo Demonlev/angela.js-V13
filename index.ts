@@ -4,12 +4,10 @@ import "dotenv/config";
 import discord, { Collection, Interaction } from "discord.js";
 import { Routes } from "discord-api-types/v10";
 import { REST } from "@discordjs/rest";
-import { guildQueryType } from "@player/player";
 
 const BOT_TOKEN = process.env.TOKEN || "";
 const BOT_APP = process.env.APP || "";
 export const ID_ADMINS = ["341647130294747137", "485033648672735253"];
-export const guildsQuries: Map<string, guildQueryType> = new Map();
 
 class DisClient extends discord.Client {
   commands: Collection<unknown, any> = new Collection();
@@ -23,6 +21,7 @@ export const Client = new DisClient({
     discord.Intents.FLAGS.GUILD_VOICE_STATES,
     discord.Intents.FLAGS.DIRECT_MESSAGES,
     discord.Intents.FLAGS.DIRECT_MESSAGE_TYPING,
+    discord.Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
   ],
   allowedMentions: { parse: ["users", "roles"], repliedUser: true },
 });
@@ -92,3 +91,9 @@ Client.once("ready", (c) => {
 });
 
 Client.login(BOT_TOKEN);
+
+process.on("uncaughtException", (e) => {
+  console.log("======================ERROR======================");
+  console.log(e);
+  console.log("======================ERROR======================");
+});

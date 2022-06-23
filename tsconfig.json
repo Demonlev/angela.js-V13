@@ -107,7 +107,6 @@
     "baseUrl": ".",
     "paths": {
       "@utils/*": ["./utils/*"],
-      "@types/*": ["./types/*"],
       "@player/*": ["./player/*"]
     },
   }
