@@ -7,7 +7,7 @@ import { REST } from "@discordjs/rest";
 
 const BOT_TOKEN = process.env.TOKEN || "";
 const BOT_APP = process.env.APP || "";
-export const ID_ADMINS = ["341647130294747137", "485033648672735253"];
+export const ID_ADMINS = ["1248584024473993339"];
 
 class DisClient extends discord.Client {
   commands: Collection<unknown, any> = new Collection();
